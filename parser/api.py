@@ -1,5 +1,6 @@
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Query
 from sqlalchemy.orm import Session
+from typing import List
 from . import crud, models, schemas
 from .database import SessionLocal, engine
 
@@ -7,6 +8,7 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+# Dependency
 def get_db():
     db = SessionLocal()
     try:
@@ -14,25 +16,29 @@ def get_db():
     finally:
         db.close()
 
-@app.get("/jobs/", response_model=list[schemas.Job])
-def read_jobs(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+@app.get("/jobs/", response_model=List[schemas.Job])
+def read_jobs(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     jobs = crud.get_jobs(db, skip=skip, limit=limit)
     return jobs
 
+@app.get("/jobs/salary/", response_model=List[schemas.Job])
+def get_jobs_with_salary(db: Session = Depends(get_db)):
+    jobs = crud.get_jobs_with_salary(db)
+    return jobs
 
+@app.get("/jobs/filter/", response_model=List[schemas.Job])
+def filter_jobs(employers: List[str] = Query(None), db: Session = Depends(get_db)):
+    if employers:
+        employers = [employer.strip() for employer in employers if employer.strip()]
+    jobs = crud.filter_jobs(db, employers=employers)
+    return jobs
 
-@app.post("/jobs/", response_model=schemas.Job)
-def create_job(job: schemas.JobCreate, db: Session = Depends(get_db)):
-    return crud.create_job(db=db, job=job)
+@app.get("/jobs/sort/", response_model=List[schemas.Job])
+def sort_jobs_by_id(db: Session = Depends(get_db)):
+    jobs = crud.sort_jobs_by_id(db)
+    return jobs
 
-
-@app.get("/jobs/{job_id}", response_model=schemas.Job)
-def read_job(job_id: int, db: Session = Depends(get_db)):
-    try:
-        db_job = crud.get_job(db, job_id=job_id)
-        if db_job is None:
-            raise HTTPException(status_code=404, detail="Job not found")
-        return db_job
-    except Exception as e:
-        logger.error(f"Error reading job with id {job_id}: {e}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+@app.get("/jobs/employers/", response_model=List[str])
+def get_unique_employers(db: Session = Depends(get_db)):
+    employers = crud.get_unique_employers(db)
+    return employers

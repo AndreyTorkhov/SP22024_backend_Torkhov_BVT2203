@@ -8,9 +8,6 @@ class JobBase(BaseModel):
     salary: Optional[float] = None
     url: Optional[str] = None
 
-class JobCreate(JobBase):
-    pass
-
 class Job(JobBase):
     id: int
 
