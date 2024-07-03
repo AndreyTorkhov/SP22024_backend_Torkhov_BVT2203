@@ -1,0 +1,23 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+
+# PyCharm IDE
+.idea/
+
+# SQLite database files (if you are using SQLite)
+*.sqlite3
+*.db
+
+# Logs
+*.log
+
+# Environment variables file
+.env
+
+# Jupyter Notebook checkpoints (if you use Jupyter Notebooks in your project)
+.ipynb_checkpoints/
