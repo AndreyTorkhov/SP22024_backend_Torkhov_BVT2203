@@ -44,7 +44,7 @@ def load_jobs_to_db(jobs_df):
                 salary=row['salary'],
                 url=row['url']
             )
-            db.add(job)
+            db.merge(job)
         db.commit()
     finally:
         db.close()
