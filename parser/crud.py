@@ -49,3 +49,26 @@ def sanitize_jobs(jobs):
         if job.salary is not None and (job.salary == float('inf') or job.salary == float('-inf') or job.salary != job.salary):
             job.salary = None
     return jobs
+
+def get_accredited_jobs(db: Session, accredited: bool):
+    jobs = db.query(Job).filter(Job.accredited_it_employer == accredited).all()
+    jobs = sanitize_jobs(jobs)
+    logger.info(f"Accredited jobs: {jobs}")
+    return jobs
+
+def get_jobs_by_schedules(db: Session, schedule_names: list[str] = None):
+    query = db.query(Job)
+
+    if schedule_names:
+        query = query.filter(Job.schedule_name.in_(schedule_names))
+
+    jobs = query.all()
+    jobs = sanitize_jobs(jobs)
+    logger.info(f"Jobs by schedules: {jobs}")
+    return jobs
+
+def get_unique_schedules(db: Session):
+    schedules = db.query(Job.schedule_name).distinct().all()
+    unique_schedules = [schedule[0] for schedule in schedules]
+    logger.info(f"Unique schedules: {unique_schedules}")
+    return unique_schedules

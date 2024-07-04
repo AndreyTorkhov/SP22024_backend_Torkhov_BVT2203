@@ -23,7 +23,9 @@ def fetch_hh_jobs():
                 "employer": job["employer"]["name"],
                 "area": job["area"]["name"],
                 "salary": job["salary"]["from"] if job["salary"] else None,
-                "url": job["alternate_url"]
+                "url": job["alternate_url"],
+                "schedule_name": job["schedule"]["name"] if job.get("schedule") else None,
+                "accredited_it_employer": job["employer"].get("accredited_it_employer", False)
             }
             jobs_list.append(job_info)
         return pd.DataFrame(jobs_list)
@@ -42,7 +44,9 @@ def load_jobs_to_db(jobs_df):
                 employer=row['employer'],
                 area=row['area'],
                 salary=row['salary'],
-                url=row['url']
+                url=row['url'],
+                schedule_name=row['schedule_name'],
+                accredited_it_employer=row['accredited_it_employer']
             )
             db.merge(job)
         db.commit()
